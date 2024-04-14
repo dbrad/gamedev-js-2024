@@ -1,0 +1,1 @@
+export let GAME_STATE: CurrentGameState = [];

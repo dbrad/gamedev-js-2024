@@ -1,0 +1,27 @@
+{
+  "name": "js13k2023",
+  "version": "0.1.0-b0",
+  "main": "index.html",
+  "author": {
+    "email": "davidbrad.015@gmail.com",
+    "name": "David Brad",
+    "url": "https://davidbrad.ca"
+  },
+  "license": "CC-BY-NC-SA-4.0",
+  "devDependencies": {
+    "express": "^4.17.1",
+    "path": "^0.12.7"
+  },
+  "dependencies": {
+    "cross-env": "^7.0.3",
+    "esbuild": "^0.19.0",
+    "esbuild-plugin-spglsl": "^0.0.3",
+    "html-inline": "^1.2.0",
+    "html-minifier-terser": "^7.2.0",
+    "roadroller": "^2.1.0",
+    "spglsl": "^0.2.6",
+    "terser": "^5.14.2",
+    "typescript": "^4.7.4",
+    "uglify-js": "^3.17.4"
+  }
+}

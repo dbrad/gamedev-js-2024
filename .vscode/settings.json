@@ -1,0 +1,31 @@
+{
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "**/node_modules": true,
+    "**/.yarn": true,
+    ".yarnrc": true,
+    "yarn.lock": true,
+  },
+  "betterAlign.surroundSpace": {
+    "colon": [
+      0,
+      1
+    ],
+    "assignment": [
+      1,
+      1
+    ],
+    "arrow": [
+      1,
+      1
+    ],
+    "comment": 2
+  },
+  "javascript.referencesCodeLens.enabled": false,
+  "vim.smartRelativeLine": true,
+  "workbench.editor.highlightModifiedTabs": false
+}

@@ -1,0 +1,69 @@
+{
+  "compilerOptions": {
+    "module": "ES2020",
+    "target": "ES2020",
+    "lib": [
+      "dom",
+      "ES2020",
+      "webworker"
+    ],
+    "noImplicitAny": true,
+    "noEmit": true,
+    "strict": true,
+    "strictFunctionTypes": true,
+    "noUnusedLocals": true,
+    "typeRoots": [
+      "../node_modules/@types",
+      "../src"
+    ],
+    "types": [],
+    "paths": {
+      "@res/*": [
+        "./src/res/*"
+      ],
+      "@debug": [
+        "./src/ts/__debug/debug.ts"
+      ],
+      "@debug/*": [
+        "./src/ts/__debug/*"
+      ],
+      "texture": [
+        "./src/ts/_graphics/texture.ts"
+      ],
+      "gl": [
+        "./src/ts/_graphics/gl.ts"
+      ],
+      "@graphics/*": [
+        "./src/ts/_graphics/*"
+      ],
+      "math": [
+        "./src/ts/_math/math.ts"
+      ],
+      "@math/*": [
+        "./src/ts/_math/*"
+      ],
+      "@shaders/*": [
+        "./src/shaders/*"
+      ],
+      "@system-input": [
+        "./src/ts/_input/input.ts"
+      ],
+      "@game-input": [
+        "./src/ts/_input/game-input.ts"
+      ],
+      "@root/*": [
+        "./src/ts/*"
+      ],
+      "@project_root/*": [
+        "./*"
+      ]
+    }
+  },
+  "exclude": [
+    "node_modules",
+    "node_modules/**/*"
+  ],
+  "include": [
+    "./src/ts/**/*.ts"
+  ]
+}
