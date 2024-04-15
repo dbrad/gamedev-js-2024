@@ -3,7 +3,7 @@ import { gl } from '@root/_graphics/gl';
 let draw_queue: DrawCall[] = [];
 let index = 0;
 
-export function init_draw_queue(): void
+export let init_draw_queue = (): void =>
 {
     for (let i = 0; i < 25000; i++)
     {
@@ -16,9 +16,9 @@ export function init_draw_queue(): void
             h_flip_: false, v_flip_: false,
         };
     }
-}
+};
 
-export function queue_draw(x: number, y: number, w: number, h: number, sx: number, sy: number, u0: number, v0: number, u1: number, v1: number, colour: number, h_flip: boolean, v_flip: boolean)
+export let queue_draw = (x: number, y: number, w: number, h: number, sx: number, sy: number, u0: number, v0: number, u1: number, v1: number, colour: number, h_flip: boolean, v_flip: boolean) =>
 {
     let call: DrawCall = draw_queue[index];
     call.x_ = x;
@@ -35,14 +35,14 @@ export function queue_draw(x: number, y: number, w: number, h: number, sx: numbe
     call.h_flip_ = h_flip;
     call.v_flip_ = v_flip;
     index++;
-}
+};
 
-export function clear(): void
+export let clear = (): void =>
 {
     index = 0;
-}
+};
 
-export function render(): void
+export let render = (): void =>
 {
     gl.clear_();
     for (let i = 0; i < index; i++)
@@ -69,9 +69,9 @@ export function render(): void
             call.colour_);
     }
     gl.flush_();
-}
+};
 
-export function draw_count(): number
+export let draw_count = (): number =>
 {
     return index;
-}
+};

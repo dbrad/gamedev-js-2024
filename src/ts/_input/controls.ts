@@ -40,12 +40,12 @@ let gamepad: Gamepad | null = null;
 export let is_touch: boolean = false;
 let touches = [[0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [0, 0]];
 
-export function is_touch_event(e: Event | PointerEvent | TouchEvent): void 
+export let is_touch_event = (e: Event | PointerEvent | TouchEvent): void =>
 {
     is_touch = (e.type[0] === "t");
 };
 
-function set_touch_position(e: TouchEvent): void 
+let set_touch_position = (e: TouchEvent): void =>
 {
     if (!document.fullscreenElement) request_fullscreen(canvas_ref);
 
@@ -58,6 +58,7 @@ function set_touch_position(e: TouchEvent): void
         {
             touches[i][0] = floor((touch.clientX - canvas_bounds.left) / (canvas_bounds.width / SCREEN_WIDTH));
             touches[i][1] = floor((touch.clientY - canvas_bounds.top) / (canvas_bounds.height / SCREEN_HEIGHT));
+            console.log(touches[i], touch.clientX, canvas_bounds.left, canvas_bounds.width, SCREEN_WIDTH);
         }
         else
         {
@@ -68,16 +69,16 @@ function set_touch_position(e: TouchEvent): void
     e.preventDefault();
 };
 
-function is_mapped_key(key: number): key is number 
+let is_mapped_key = (key: number): key is number =>
 {
     return (key !== undefined);
 };
 
-export function initialize_input(canvas: HTMLCanvasElement): void 
+export let initialize_input = (canvas: HTMLCanvasElement): void =>
 {
     canvas_ref = canvas;
 
-    document.addEventListener("touchmove", set_touch_position);
+    canvas_ref.addEventListener("touchmove", set_touch_position);
     canvas_ref.addEventListener("touchstart", set_touch_position);
     canvas_ref.addEventListener("touchend", set_touch_position);
     document.addEventListener("keydown", (e: KeyboardEvent) =>
@@ -120,7 +121,7 @@ let half_button_size = button_size / 2;
 let [a_button_x, a_button_y] = [SCREEN_WIDTH - button_size - 80, SCREEN_HEIGHT - button_size - 120];
 let [b_button_x, b_button_y] = [SCREEN_WIDTH - button_size - 20, SCREEN_HEIGHT - button_size - 140];
 
-export function update_hardware_input(): void 
+export let update_hardware_input = (): void =>
 {
     if (gamepad || is_touch)
     {
@@ -186,7 +187,7 @@ export function update_hardware_input(): void
 let rate_limit: number[] = [0, 0, 0, 0, 0, 0];
 let PRESSED: number[] = [];
 
-export function update_input_state(delta: number): void 
+export let update_input_state = (delta: number): void =>
 {
     for (let key = 0; key <= 5; key++) 
     {
@@ -238,7 +239,7 @@ export function update_input_state(delta: number): void
 };
 
 let get_button_texture = (key: number, base_texture: number): number => key_state[key] === KEY_IS_UP ? base_texture : base_texture + 2;
-export function render_controls(): void 
+export let render_controls = (): void =>
 {
     let help_text = "";
     if (true)
@@ -249,10 +250,10 @@ export function render_controls(): void
             push_textured_quad(TEXTURE_D_PAD_UP, dpad_x, dpad_y, dpad_scale, WHITE);
 
         if (key_state[D_DOWN] !== KEY_IS_UP)
-            push_textured_quad(TEXTURE_D_PAD_DOWN, dpad_x, dpad_y, dpad_scale, WHITE);
+            push_textured_quad(TEXTURE_D_PAD_UP, dpad_x, dpad_y, dpad_scale, WHITE, false, true);
 
         if (key_state[D_LEFT] !== KEY_IS_UP)
-            push_textured_quad(TEXTURE_D_PAD_LEFT, dpad_x, dpad_y, dpad_scale, WHITE);
+            push_textured_quad(TEXTURE_D_PAD_RIGHT, dpad_x, dpad_y, dpad_scale, WHITE, true);
 
         if (key_state[D_RIGHT] !== KEY_IS_UP)
             push_textured_quad(TEXTURE_D_PAD_RIGHT, dpad_x, dpad_y, dpad_scale, WHITE);
@@ -275,7 +276,7 @@ export function render_controls(): void
 
 let interval_timers: number[] = [0, 0, 0, 0, 0, 0];
 let interval_durations: number[] = [0, 0, 0, 0, 0, 0];
-export function set_key_pulse_time(keys: number[], interval_duration: number): void 
+export let set_key_pulse_time = (keys: number[], interval_duration: number): void =>
 {
     for (let key of keys)
     {
@@ -284,7 +285,7 @@ export function set_key_pulse_time(keys: number[], interval_duration: number): v
     }
 };
 
-export function clear_input(): void 
+export let clear_input = (): void =>
 {
     for (let key = 0; key <= 5; key++) 
     {

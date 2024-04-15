@@ -1,5 +1,5 @@
-import { debug } from "@debug";
 
+import { assert } from "@debug";
 import main_fragment from "@shaders/main.frag";
 import main_vertex from "@shaders/main.vert";
 
@@ -31,26 +31,26 @@ export namespace gl
   let vertex_buffer: WebGLBuffer;
   let batch_count: number = 0;
 
-  export function initialize_(canvas: HTMLCanvasElement): void
+  export let initialize_ = (canvas: HTMLCanvasElement): void =>
   {
     {
       context = canvas.getContext("webgl2", { powerPreference: "high-performance", antialias: false, depth: false }) as WebGL2RenderingContext;
-      debug.assert(context !== undefined && context !== null, "No GL context created.");
+      assert(context !== undefined && context !== null, "No GL context created.");
     }
 
-    function compile_shader_(source: string, type: number): WebGLShader
+    let compile_shader_ = (source: string, type: number): WebGLShader =>
     {
       let shader = context.createShader(type);
-      debug.assert(shader !== null, "unable to created shader");
+      assert(shader !== null, "unable to created shader");
       context.shaderSource(shader, source);
       context.compileShader(shader);
       return shader;
     };
 
-    function create_shader_program_(vsSource: string, fsSource: string): WebGLProgram
+    let create_shader_program_ = (vsSource: string, fsSource: string): WebGLProgram =>
     {
       let program = context.createProgram();
-      debug.assert(program !== null, "unable to created program");
+      assert(program !== null, "unable to created program");
       let vShader: WebGLShader = compile_shader_(vsSource, GL_VERTEX_SHADER);
       let fShader: WebGLShader = compile_shader_(fsSource, GL_FRAGMENT_SHADER);
       context.attachShader(program, vShader);
@@ -59,10 +59,10 @@ export namespace gl
       return program;
     };
 
-    function create_buffer_(bufferType: number, size: number, usage: number): WebGLBuffer
+    let create_buffer_ = (bufferType: number, size: number, usage: number): WebGLBuffer =>
     {
       let buffer = context.createBuffer();
-      debug.assert(buffer !== null, "unable to created buffer");
+      assert(buffer !== null, "unable to created buffer");
       context.bindBuffer(bufferType, buffer);
       context.bufferData(bufferType, size, usage);
       return buffer;
@@ -128,11 +128,11 @@ export namespace gl
     context.uniform1i(loc_m_texture_uniform, 0);
   };
 
-  export function upload_atlas_(image: TexImageSource): void
+  export let upload_atlas_ = (image: TexImageSource): void =>
   {
     context.activeTexture(GL_TEXTURE0);
     let texture = context.createTexture();
-    debug.assert(texture !== null, "Unable to create texture.");
+    assert(texture !== null, "Unable to create texture.");
     context.bindTexture(GL_TEXTURE_2D, texture);
     context.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     context.texParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -141,12 +141,12 @@ export namespace gl
     context.texImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, image);
   };
 
-  export function set_clear_colour_(r: number, g: number, b: number): void
+  export let set_clear_colour_ = (r: number, g: number, b: number): void =>
   {
     context.clearColor(r, g, b, 1);
   };
 
-  export function flush_(): void
+  export let flush_ = (): void =>
   {
     if (batch_count > 0)
     {
@@ -154,14 +154,14 @@ export namespace gl
       context.drawElements(GL_TRIANGLES, batch_count * VERTICES_PER_QUAD, GL_UNSIGNED_SHORT, 0);
       batch_count = 0;
     }
-  }
+  };
 
-  export function clear_(): void
+  export let clear_ = (): void =>
   {
     context.clear(GL_COLOR_BUFFER_BIT);
   };
 
-  export function push_quad_(x: number, y: number, w: number, h: number, tx: number, ty: number, sx: number, sy: number, u0: number, v0: number, u1: number, v1: number, colour: number): void
+  export let push_quad_ = (x: number, y: number, w: number, h: number, tx: number, ty: number, sx: number, sy: number, u0: number, v0: number, u1: number, v1: number, colour: number): void =>
   {
     if (batch_count + 1 >= MAX_BATCH)
     {

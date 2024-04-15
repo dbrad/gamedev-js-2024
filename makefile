@@ -29,7 +29,7 @@ release: generate-constants
 	@yarn html-minifier-terser --collapse-whitespace --remove-comments --remove-attribute-quotes --input-dir src/html/ --output-dir build/release/
 	@node scripts/version-bump.mjs
 	@node scripts/release-app.mjs | node_modules/.bin/uglifyjs --config-file scripts/minify.config.json -o build/release/app.js
-	@yarn roadroller build/release/app.js -O1 -o build/release/app.js
+	# @yarn roadroller build/release/app.js -O1 -o build/release/app.js
 	@rm -rf dist
 	@mkdir -p dist/src
 	@yarn html-inline -i ./build/release/index.html -o ./dist/src/index.html

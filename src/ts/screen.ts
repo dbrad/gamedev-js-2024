@@ -1,20 +1,20 @@
-import { debug } from '@debug';
+import { assert } from '@debug';
 import { floor, min } from 'math';
 
 let stage: HTMLDivElement;
 let canvas: HTMLCanvasElement;
 
-function scale(): void
+let scale = (): void =>
 {
-  const scaleX: number = window.innerWidth / canvas.width;
-  const scaleY: number = window.innerHeight / canvas.height;
+  const scaleX: number = window.innerWidth / SCREEN_WIDTH;
+  const scaleY: number = window.innerHeight / SCREEN_HEIGHT;
   let scaleToFit: number = floor(min(scaleX, scaleY));
   scaleToFit = scaleToFit < 1 ? 1 : scaleToFit;
   const rule: string = "scale(" + scaleToFit + ")";
   stage.style.transform = rule;
 };
 
-export function init_canvas(): HTMLCanvasElement
+export let init_canvas = (): HTMLCanvasElement =>
 {
   document.title = "Game";
   document.body.style.cssText = "margin:0;padding:0;background-color:#000;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;";
@@ -33,16 +33,16 @@ export function init_canvas(): HTMLCanvasElement
   return canvas;
 };
 
-export function request_fullscreen(canvas: HTMLCanvasElement): void
+export let request_fullscreen = (canvas: HTMLCanvasElement): void =>
 {
   if (document.fullscreenEnabled)
   {
     if (!document.fullscreenElement)
     {
-      let body = document.querySelector("body");
-      let fullscreen = canvas.requestFullscreen || canvas.mozRequestFullScreen || canvas.webkitRequestFullscreen || canvas.msRequestFullscreen;
-      debug.assert(fullscreen !== undefined, "Unable to find a requestFullscreen implementation.");
-      fullscreen.call(body);
+      // let body = document.querySelector("body");
+      // let fullscreen = canvas.requestFullscreen || canvas.mozRequestFullScreen || canvas.webkitRequestFullscreen || canvas.msRequestFullscreen;
+      // assert(fullscreen !== undefined, "Unable to find a requestFullscreen implementation.");
+      document.body.requestFullscreen();
     }
     else
     {

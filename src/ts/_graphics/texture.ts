@@ -1,7 +1,7 @@
-import { debug } from "@debug";
 import { character_code_map } from "@root/_graphics/text";
 import texture_atlas_data_url from "@res/sheet.webp";
 import { gl } from "@root/_graphics/gl";
+import { assert } from "@debug";
 
 let texture_definitions: TextureDefinition[] = [
   [TEXTURE_TYPE_SPRITE, [TEXTURE_C_4x4], 0, 16, 4, 4],
@@ -9,18 +9,18 @@ let texture_definitions: TextureDefinition[] = [
   [TEXTURE_TYPE_SPRITE, [TEXTURE_C_6x6], 9, 16, 6, 6],
   [TEXTURE_TYPE_SPRITE, [TEXTURE_C_7x7], 0, 22, 7, 7],
   [TEXTURE_TYPE_SPRITE, [TEXTURE_C_8x8], 7, 22, 8, 8],
-  [TEXTURE_TYPE_SPRITE_STRIP, [TEXTURE_C_16x16, TEXTURE_GRASS_1, TEXTURE_GRASS_2, TEXTURE_GRASS_3, TEXTURE_GRASS_4, TEXTURE_FLOWERS, TEXTURE_A_BUTTON_UP, TEXTURE_B_BUTTON_UP,
-    TEXTURE_A_BUTTON_DOWN, TEXTURE_B_BUTTON_DOWN, TEXTURE_D_PAD, TEXTURE_D_PAD_UP, TEXTURE_D_PAD_RIGHT, TEXTURE_D_PAD_DOWN, TEXTURE_D_PAD_LEFT], 16, 16, 16, 16],
+  [TEXTURE_TYPE_SPRITE_STRIP, [TEXTURE_C_16x16, TEXTURE_D_PAD, TEXTURE_D_PAD_UP, TEXTURE_D_PAD_RIGHT, TEXTURE_A_BUTTON_UP, TEXTURE_B_BUTTON_UP, TEXTURE_A_BUTTON_DOWN, TEXTURE_B_BUTTON_DOWN, TEXTURE_WALL, TEXTURE_WALL_CRACKED, TEXTURE_WALL_MOSS], 16, 16, 16, 16],
+  [TEXTURE_TYPE_SPRITE_STRIP, [TEXTURE_ROBOT_FRONT_IDLE, TEXTURE_ROBOT_FRONT_STEP, TEXTURE_ROBOT_BACK_IDLE, TEXTURE_ROBOT_BACK_STEP, TEXTURE_ROBOT_SIDE_IDLE, TEXTURE_ROBOT_SIDE_STEP_1, TEXTURE_ROBOT_SIDE_STEP_2], 0, 32, 16, 16],
 ];
 
 export let TEXTURE_CACHE: TextureCache = [];
 
-function make_texture(_w: number, _h: number, _u0: number, _v0: number, _u1: number, _v1: number): Texture
+let make_texture = (_w: number, _h: number, _u0: number, _v0: number, _u1: number, _v1: number): Texture =>
 {
   return { w_: _w, h_: _h, u0_: _u0, v0_: _v0, u1_: _u1, v1_: _v1 };
 };
 
-export async function load_textures(): Promise<void>
+export let load_textures = async (): Promise<void> =>
 {
   return new Promise(async (resolve) =>
   {
@@ -28,8 +28,8 @@ export async function load_textures(): Promise<void>
     let blob = await response.blob();
     let image_bitmap = await createImageBitmap(blob);
 
-    debug.assert(ATLAS_WIDTH === image_bitmap.width, `ATLAS WIDTH CHANGED (expected: ${ATLAS_WIDTH} actual: ${image_bitmap.width})`);
-    debug.assert(ATLAS_HEIGHT === image_bitmap.height, `ATLAS HEIGHT CHANGED (expected: ${ATLAS_HEIGHT} actual: ${image_bitmap.height})`);
+    assert(ATLAS_WIDTH === image_bitmap.width, `ATLAS WIDTH CHANGED (expected: ${ATLAS_WIDTH} actual: ${image_bitmap.width})`);
+    assert(ATLAS_HEIGHT === image_bitmap.height, `ATLAS HEIGHT CHANGED (expected: ${ATLAS_HEIGHT} actual: ${image_bitmap.height})`);
 
     let canvas = new OffscreenCanvas(ATLAS_WIDTH, ATLAS_HEIGHT);
     canvas.getContext("2d")?.drawImage(image_bitmap, 0, 0);

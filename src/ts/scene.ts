@@ -3,6 +3,7 @@ import { clear_particles, draw_particles, update_particles } from "@root/_graphi
 import { push_quad } from "@root/_graphics/quad";
 
 import { draw_node, reset_node, update_node } from "./node";
+import { update_idle_animation_frame } from "@graphics/animation";
 
 let current_scene: number = SCREEN_INIT,
     on_transition: boolean = true,
@@ -13,21 +14,21 @@ let current_scene: number = SCREEN_INIT,
     transition_rate: number = 510,
     scenes: number[] = [];
 
-export function register_scene(scene_id: number, root_id: number): void
+export let register_scene = (scene_id: number, root_id: number): void =>
 {
     scenes[scene_id] = root_id;
-}
+};
 
-export function switch_scene(scene_id: number)
+export let switch_scene = (scene_id: number) =>
 {
     on_transition = true;
     trans_fade_out = false;
     trans_from_scene = current_scene;
     trans_to_scene = scene_id;
     trans_alpha = 0;
-}
+};
 
-function update_transition(delta: number): void
+let update_transition = (delta: number): void =>
 {
     let ds = delta / 1000;
     if (!trans_fade_out)
@@ -54,10 +55,11 @@ function update_transition(delta: number): void
             trans_to_scene = SCREEN_UNKNOWN;
         }
     }
-}
+};
 
-export function update_scene(delta: number)
+export let update_scene = (delta: number) =>
 {
+    update_idle_animation_frame(delta);
     if (!on_transition)
     {
         update_particles(delta);
@@ -67,9 +69,9 @@ export function update_scene(delta: number)
     {
         update_transition(delta);
     }
-}
+};
 
-export function draw_scene(delta: number)
+export let draw_scene = (delta: number) =>
 {
     draw_node(scenes[current_scene], 0, 0, delta);
     draw_particles(delta);
@@ -77,4 +79,4 @@ export function draw_scene(delta: number)
     {
         push_quad(152, 8, 336, 336, to_abgr_value(0, 0, 0, trans_alpha));
     }
-}
+};

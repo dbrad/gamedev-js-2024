@@ -1,4 +1,3 @@
-import { debug } from "@debug";
 import { clear, draw_count, init_draw_queue, render } from "@root/_graphics/draw";
 import { gl } from "@root/_graphics/gl";
 import { init_particles } from "@root/_graphics/particle";
@@ -13,6 +12,7 @@ import { create_game_scene } from "./scene/game-screen";
 import { create_main_menu } from "./scene/main-menu";
 import { create_splash_screen } from "./scene/splash-screen";
 import { init_canvas } from "./screen";
+import { init_performance_meter, toggle_performance_display, performance_mark, draw_performance_meter, tick_performance_meter } from "@debug";
 
 window.addEventListener("load", async () =>
 {
@@ -21,7 +21,7 @@ window.addEventListener("load", async () =>
     await load_textures();
     gl.set_clear_colour_(0.0, 0.0, 0.0);
 
-    debug.init_performance_meter();
+    init_performance_meter();
     init_draw_queue();
     init_particles();
 
@@ -49,7 +49,7 @@ window.addEventListener("load", async () =>
             {
                 document.addEventListener("keyup", (e: KeyboardEvent) =>
                 {
-                    if (e.code === "KeyD") debug.toggle_performance_display();
+                    if (e.code === "KeyD") toggle_performance_display();
                 });
             }
         }
@@ -62,12 +62,12 @@ window.addEventListener("load", async () =>
         then: number = performance.now(),
         acc_delta: number = 0;
 
-    function tick(now: number)
+    let tick = (now: number) =>
     {
         requestAnimationFrame(tick);
         if (playing)
         {
-            debug.performance_mark("start_of_frame");
+            performance_mark("start_of_frame");
             let frame_delta = now - then;
             then = now;
             acc_delta += frame_delta;
@@ -78,33 +78,33 @@ window.addEventListener("load", async () =>
                 if (acc_delta > 250)
                     acc_delta = target_update_ms;
                 clear();
-                debug.performance_mark("update_start");
+                performance_mark("update_start");
                 {
                     update_hardware_input();
                     update_input_state(acc_delta);
                     update_scene(acc_delta);
                 }
-                debug.performance_mark("update_end");
+                performance_mark("update_end");
 
-                debug.performance_mark("draw_start");
+                performance_mark("draw_start");
                 {
                     draw_scene(acc_delta);
                     render_controls();
                     if (DEBUG)
                         draw_calls = draw_count();
 
-                    debug.draw_performance_meter();
+                    draw_performance_meter();
                     acc_delta = 0;
                 }
-                debug.performance_mark("draw_end");
+                performance_mark("draw_end");
 
-                debug.performance_mark("render_start");
+                performance_mark("render_start");
                 {
                     render();
                 }
-                debug.performance_mark("render_end");
+                performance_mark("render_end");
             }
-            debug.tick_performance_meter(frame_delta, draw_calls);
+            tick_performance_meter(frame_delta, draw_calls);
         }
         else
         {
@@ -112,7 +112,7 @@ window.addEventListener("load", async () =>
             push_text("tap to start", SCREEN_CENTER_X, SCREEN_CENTER_Y, WHITE, 2, TEXT_ALIGN_CENTER);
             render();
         }
-    }
+    };
 
     requestAnimationFrame(tick);
 });

@@ -8,7 +8,7 @@ esbuild.build({
   format: 'iife',
   write: false,
   define: {
-    "DEBUG": 'false',
+    "DEBUG": "false",
     ...DEFINITIONS
   },
   loader: {

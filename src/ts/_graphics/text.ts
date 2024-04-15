@@ -1,12 +1,12 @@
-import { debug } from '@debug';
-import { floor } from '@root/_math/math';
 import { TEXTURE_CACHE } from '@root/_graphics/texture';
+import { floor } from '@root/_math/math';
 
+import { assert } from '@debug';
 import { OFF_WHITE } from './colour';
 import { queue_draw } from './draw';
 
 export let character_code_map: { [key: string]: number; } = {};
-export function push_text(text: string | number, x: number, y: number, colour: number = OFF_WHITE, scale: number = 1, horizontal_align: number = TEXT_ALIGN_LEFT, vertical_align: number = TEXT_ALIGN_TOP): void
+export let push_text = (text: string | number, x: number, y: number, colour: number = OFF_WHITE, scale: number = 1, horizontal_align: number = TEXT_ALIGN_LEFT, vertical_align: number = TEXT_ALIGN_TOP): void =>
 {
   text = (text + "").toUpperCase();
   let letter_size: number = 8 * scale;
@@ -32,11 +32,12 @@ export function push_text(text: string | number, x: number, y: number, colour: n
     {
       alignment_offset = floor(line_length);
     }
+
     for (let letter of line)
     {
       if (letter !== " ")
       {
-        debug.assert(character_code_map[letter] !== undefined, `Undefined character ${letter} used.`);
+        assert(character_code_map[letter] !== undefined, `Undefined character ${letter} used.`);
         let t = TEXTURE_CACHE[100 + character_code_map[letter]];
         queue_draw(
           x + x_offset - alignment_offset, y - y_offset,
