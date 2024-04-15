@@ -38,6 +38,24 @@ export let set_vis = (map: LevelMap, x: number, y: number): void =>
     map.v[x + y * map.w] = true;
 };
 
+export let get_obj = (map: LevelMap, x: number, y: number): MapObject =>
+{
+    if (x < 0 || y < 0 || x >= map.w || y >= map.h)
+    {
+        return [-1, -1];
+    }
+    return map.o[x + y * map.w];
+};
+
+export let set_obj = (map: LevelMap, x: number, y: number, type: number): void =>
+{
+    if (x < 0 || y < 0 || x >= map.w || y >= map.h)
+    {
+        return;
+    }
+    map.o[x + y * map.w] = [type, 0];
+};
+
 export let home_base = (): LevelMap =>
 {
     return generate_map(7, 0);
@@ -60,8 +78,7 @@ export let generate_map = (map_size: number = 61, seed: number = -1): LevelMap =
         m: new Array<number>(map_size * map_size).fill(TILE_WALL),
         v: [],
         s: [0, 0],
-        d: [],
-        l: [],
+        o: [],
     };
     let num_room_tries: number = 1000;
     let extra_connector_chance: number = 10;
@@ -254,15 +271,20 @@ export let generate_map = (map_size: number = 61, seed: number = -1): LevelMap =
 
         sources.forEach(i => open_regions.delete(i));
 
+        let allow_extra = true; // We'll allow only 1 extra per pass, to prevent double wide doors.
         connectors = connectors.filter((pos) =>
         {
-            if (distance_between_points(connector, pos) < 2) return false;
+            if (distance_between_points(connector, pos) <= 2) return false;
 
             let idx = pos[X] + pos[Y] * map.w;
             let regions = new Set([...connector_regions.get(idx)!!.values()].map((region) => merged[region]));
             if (regions.size > 1) return true;
 
-            if (srand_int(0, extra_connector_chance) === 0) add_junction(pos);
+            if (allow_extra && srand_int(0, extra_connector_chance) === 0)
+            {
+                allow_extra = false;
+                add_junction(pos);
+            }
             return false;
         });
     }
@@ -296,15 +318,14 @@ export let generate_map = (map_size: number = 61, seed: number = -1): LevelMap =
     };
 
     //Expand Map
-    const expansion_factor = 3;
+    const expansion_factor = 2;
     let final_map: LevelMap = {
         w: map.w * expansion_factor,
         h: map.h * expansion_factor,
         m: new Array<number>((map.w * expansion_factor) * (map.h * expansion_factor)).fill(TILE_WALL),
         v: new Array<boolean>((map.w * expansion_factor) * (map.h * expansion_factor)).fill(false),
         s: scale_V2(map.s, expansion_factor),
-        d: [],
-        l: [],
+        o: [],
     };
 
     for (let x = 0; x < map.w; x++)
@@ -323,17 +344,53 @@ export let generate_map = (map_size: number = 61, seed: number = -1): LevelMap =
             }
             switch (tile)
             {
-                case TILE_DOOR_OPEN:
-                case TILE_DOOR_CLOSED:
-                case TILE_FLOOR:
-                    let up_tile = get_tile(map, x, y - 1);
-                    if (up_tile === TILE_WALL)
+                case TILE_WALL:
+                    let down_tile = get_tile(map, x, y + 1);
+                    if (down_tile === TILE_FLOOR || down_tile === TILE_DOOR_OPEN || down_tile === TILE_DOOR_CLOSED)
                     {
                         for (let ox = 0; ox < expansion_factor; ox++)
                         {
-                            set_tile(final_map, ex + ox, ey, srand_int(0, 4) === 0 ? srand_int(0, 4) === 0 ? TILE_VIS_WALL_MOSS : TILE_VIS_WALL_CRACKED : TILE_VIS_WALL);
+                            set_tile(final_map, ex + ox, ey + 1, srand_int(0, 4) === 0 ? srand_int(0, 4) === 0 ? TILE_VIS_WALL_MOSS : TILE_VIS_WALL_CRACKED : TILE_VIS_WALL);
                         }
                     }
+                    break;
+                // case TILE_DOOR_OPEN:
+                // case TILE_DOOR_CLOSED:
+                // case TILE_FLOOR:
+                //     let up_tile = get_tile(map, x, y - 1);
+                //     if (up_tile === TILE_WALL)
+                //     {
+                //         for (let ox = 0; ox < expansion_factor; ox++)
+                //         {
+                //             set_tile(final_map, ex + ox, ey, srand_int(0, 4) === 0 ? srand_int(0, 4) === 0 ? TILE_VIS_WALL_MOSS : TILE_VIS_WALL_CRACKED : TILE_VIS_WALL);
+                //         }
+                //     }
+                //     break;
+            }
+        }
+    }
+
+    // Decorate
+    for (let x = 0; x < final_map.w; x++)
+    {
+        for (let y = 0; y < final_map.h; y++)
+        {
+            let tile = get_tile(final_map, x, y);
+            switch (tile)
+            {
+                case TILE_DOOR_OPEN:
+                case TILE_DOOR_CLOSED:
+                    // Add doors
+                    // Add door switch
+                    break;
+                case TILE_VIS_WALL:
+                case TILE_VIS_WALL_CRACKED:
+                case TILE_VIS_WALL_MOSS:
+                    // Chance to add vending machines and other back wall specific objects
+                    break;
+                case TILE_FLOOR:
+                    if (srand_int(0, 20) === 0) set_obj(final_map, x, y, 0);
+                    // Chance to add floor stuff
                     break;
             }
         }

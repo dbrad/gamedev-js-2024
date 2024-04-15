@@ -1,7 +1,7 @@
 import { to_abgr_value } from '@graphics/colour';
 import { push_quad, push_textured_quad } from '@graphics/quad';
 import { DOWN_PRESSED, LEFT_PRESSED, RIGHT_PRESSED, UP_PRESSED, set_key_pulse_time } from '@root/_input/controls';
-import { generate_map, get_tile, get_vis, set_vis } from '@root/gameplay/map';
+import { generate_map, get_obj, get_tile, get_vis, set_vis } from '@root/gameplay/map';
 import { new_node } from '@root/node';
 import { ceil, easeOutQuad, floor, is_point_in_rect, lerp, min, points_on_circle, points_on_line, rand_int } from 'math';
 
@@ -77,7 +77,8 @@ let update_lighting = (delta: number): void =>
 let move_player = (x: number, y: number, duration: number = 100): void =>
 {
     // TODO COLLISION CHECK Loot and NPCs
-    if (get_tile(map, player_pos[X] + x, player_pos[Y] + y) === TILE_WALL)
+    let tile = get_tile(map, player_pos[X] + x, player_pos[Y] + y);
+    if (tile === TILE_WALL || tile === TILE_VIS_WALL || tile === TILE_VIS_WALL_CRACKED || tile === TILE_VIS_WALL_MOSS)
         return;
 
     if (player_move_lifetime_remaining <= 0)
@@ -167,6 +168,11 @@ let draw_player = (): void =>
     push_textured_quad(t, (camera_radius) * 16 + 136, (camera_radius) * 16, 1, 0xffffcccc, flip, false, !player_walking);
 };
 
+let draw_battery = (x: number, y: number, current: number, max: number): void =>
+{
+    // Stylized Segmented Bar
+};
+
 ////////////////////////////////////////////////////
 
 export let create_game_scene = (root_id: number): number =>
@@ -251,6 +257,12 @@ let draw_game_scene = (node_id: number, x: number, y: number, delta: number): vo
                 default:
                     push_quad(x * 16 + coffx, y * 16 + coffy, 16, 16, 0xff000000);
             }
+
+            let obj = get_obj(map, cx, cy);
+            if (obj && obj[0] !== -1)
+            {
+                push_quad(x * 16 + coffx, y * 16 + coffy, 16, 16, 0xffaa66aa);
+            }
         }
     }
 
@@ -276,13 +288,13 @@ let draw_game_scene = (node_id: number, x: number, y: number, delta: number): vo
     push_quad(0, SCREEN_HEIGHT - 24, SCREEN_WIDTH, 24, 0xff000000);
 
     // Minimap
-    for (let x = 1; x < map.w; x += 3)
+    for (let x = 1; x < map.w; x += 2)
     {
-        for (let y = 1; y < map.h; y += 3)
+        for (let y = 1; y < map.h; y += 2)
         {
-            let rx = (x - 1) / 3 * 2;
-            let ry = (y - 1) / 3 * 2;
-            let rw = map.w / 3 * 2;
+            let rx = (x - 1) / 2 * 2;
+            let ry = (y - 1) / 2 * 2;
+            let rw = map.w / 2 * 2;
             let vis = get_vis(map, x, y);
             if (!vis) continue;
 
@@ -290,9 +302,9 @@ let draw_game_scene = (node_id: number, x: number, y: number, delta: number): vo
             switch (tile)
             {
                 case TILE_FLOOR:
-                case TILE_VIS_WALL:
-                case TILE_VIS_WALL_CRACKED:
-                case TILE_VIS_WALL_MOSS:
+                    // case TILE_VIS_WALL:
+                    // case TILE_VIS_WALL_CRACKED:
+                    // case TILE_VIS_WALL_MOSS:
                     push_quad(SCREEN_WIDTH - rw - 5 + rx, 5 + ry, 1, 1, 0xff666666);
                     break;
                 case TILE_DOOR_OPEN:
@@ -303,7 +315,7 @@ let draw_game_scene = (node_id: number, x: number, y: number, delta: number): vo
                     break;
             }
 
-            if (is_point_in_rect(player_pos[X], player_pos[Y], x - 1, y - 1, 3, 3))
+            if (is_point_in_rect(player_pos[X], player_pos[Y], x - 1, y - 1, 2, 2))
             {
                 push_quad(SCREEN_WIDTH - rw - 5 + rx, 5 + ry, 1, 1, 0xffffffff);
             }

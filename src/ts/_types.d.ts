@@ -18,7 +18,6 @@ type Player = [
 ];
 
 type MapObject = [
-    pos: V2,
     type: number,
     index: number
 ];
@@ -74,6 +73,5 @@ type LevelMap = {
     m: number[],
     v: boolean[],
     s: V2,
-    d: Door[],
-    l: Loot[],
+    o: MapObject[],
 };
