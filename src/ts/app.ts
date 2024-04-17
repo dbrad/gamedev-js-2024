@@ -3,16 +3,15 @@ import { gl } from "@root/_graphics/gl";
 import { init_particles } from "@root/_graphics/particle";
 import { load_textures } from "@root/_graphics/texture";
 
+import { draw_performance_meter, init_performance_meter, performance_mark, tick_performance_meter, toggle_performance_display } from "@debug";
 import { WHITE } from "@graphics/colour";
 import { push_text } from "@graphics/text";
+import { init_sfx_system } from "./_audio/sfx";
 import { initialize_input, is_touch_event, render_controls, update_hardware_input, update_input_state } from "./_input/controls";
-import { new_node } from "./node";
 import { draw_scene, register_scene, update_scene } from "./scene";
-import { create_game_scene } from "./scene/game-screen";
-import { create_main_menu } from "./scene/main-menu";
-import { create_splash_screen } from "./scene/splash-screen";
+import { draw_game_scene, reset_game_scene, update_game_scene } from "./scene/game-screen";
+import { draw_splash_screen, update_splash_screen } from "./scene/splash-screen";
 import { init_canvas } from "./screen";
-import { init_performance_meter, toggle_performance_display, performance_mark, draw_performance_meter, tick_performance_meter } from "@debug";
 
 window.addEventListener("load", async () =>
 {
@@ -30,20 +29,15 @@ window.addEventListener("load", async () =>
     {
         if (!playing)
         {
+            init_sfx_system();
             initialize_input(canvas);
             is_touch_event(e);
             canvas.removeEventListener("touchstart", initialize_game);
             canvas.removeEventListener("pointerdown", initialize_game);
             playing = true;
-            const root = new_node();
-            const splash_screen = create_splash_screen(root);
-            register_scene(SCREEN_INIT, splash_screen);
 
-            const main_menu = create_main_menu(root);
-            register_scene(SCREEN_MENU, main_menu);
-
-            const game_scene = create_game_scene(root);
-            register_scene(SCREEN_GAME, game_scene);
+            register_scene(SCREEN_INIT, () => { }, update_splash_screen, draw_splash_screen);
+            register_scene(SCREEN_GAME, reset_game_scene, update_game_scene, draw_game_scene);
 
             if (DEBUG)
             {

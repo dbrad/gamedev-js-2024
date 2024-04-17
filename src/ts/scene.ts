@@ -2,7 +2,6 @@ import { to_abgr_value } from "@root/_graphics/colour";
 import { clear_particles, draw_particles, update_particles } from "@root/_graphics/particle";
 import { push_quad } from "@root/_graphics/quad";
 
-import { draw_node, reset_node, update_node } from "./node";
 import { update_idle_animation_frame } from "@graphics/animation";
 
 let current_scene: number = SCREEN_INIT,
@@ -12,11 +11,11 @@ let current_scene: number = SCREEN_INIT,
     trans_to_scene: number = SCREEN_UNKNOWN,
     trans_alpha: number = 255,
     transition_rate: number = 510,
-    scenes: number[] = [];
+    scenes: Scene[] = [];
 
-export let register_scene = (scene_id: number, root_id: number): void =>
+export let register_scene = (scene_id: number, reset_fn: VoidFunction, update_fn: TimedFunction, render_fn: TimedFunction): void =>
 {
-    scenes[scene_id] = root_id;
+    scenes[scene_id] = [reset_fn, update_fn, render_fn];
 };
 
 export let switch_scene = (scene_id: number) =>
@@ -39,7 +38,7 @@ let update_transition = (delta: number): void =>
             trans_alpha = 255;
             clear_particles();
             current_scene = trans_to_scene;
-            reset_node(current_scene);
+            scenes[current_scene][0]();
             trans_fade_out = true;
         }
     }
@@ -63,7 +62,7 @@ export let update_scene = (delta: number) =>
     if (!on_transition)
     {
         update_particles(delta);
-        update_node(scenes[current_scene], 0, 0, delta);
+        scenes[current_scene][1](delta);
     }
     else
     {
@@ -73,7 +72,7 @@ export let update_scene = (delta: number) =>
 
 export let draw_scene = (delta: number) =>
 {
-    draw_node(scenes[current_scene], 0, 0, delta);
+    scenes[current_scene][2](delta);
     draw_particles(delta);
     if (on_transition)
     {

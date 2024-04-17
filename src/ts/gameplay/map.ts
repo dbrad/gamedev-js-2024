@@ -58,7 +58,12 @@ export let set_obj = (map: LevelMap, x: number, y: number, type: number): void =
 
 export let home_base = (): LevelMap =>
 {
-    return generate_map(7, 0);
+    let map = generate_map(15, 0);
+    map.v.fill(true);
+    map.o = [];
+    map.s[X] = 11;
+    map.s[Y] = 24;
+    return map;
 };
 
 const n: V2 = [0, -1];

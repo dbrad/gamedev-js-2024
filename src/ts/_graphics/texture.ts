@@ -1,7 +1,7 @@
-import { character_code_map } from "@root/_graphics/text";
+import { assert } from "@debug";
 import texture_atlas_data_url from "@res/sheet.webp";
 import { gl } from "@root/_graphics/gl";
-import { assert } from "@debug";
+import { character_code_map } from "@root/_graphics/text";
 
 let texture_definitions: TextureDefinition[] = [
   [TEXTURE_TYPE_SPRITE, [TEXTURE_C_4x4], 0, 16, 4, 4],
@@ -31,7 +31,9 @@ export let load_textures = async (): Promise<void> =>
     assert(ATLAS_WIDTH === image_bitmap.width, `ATLAS WIDTH CHANGED (expected: ${ATLAS_WIDTH} actual: ${image_bitmap.width})`);
     assert(ATLAS_HEIGHT === image_bitmap.height, `ATLAS HEIGHT CHANGED (expected: ${ATLAS_HEIGHT} actual: ${image_bitmap.height})`);
 
-    let canvas = new OffscreenCanvas(ATLAS_WIDTH, ATLAS_HEIGHT);
+    let canvas = document.createElement("canvas",);
+    canvas.width = ATLAS_WIDTH;
+    canvas.height = ATLAS_HEIGHT;
     canvas.getContext("2d")?.drawImage(image_bitmap, 0, 0);
     gl.upload_atlas_(canvas);
 

@@ -30,7 +30,7 @@ const DISPLAY_INTERVAL: number = 100;
 
 let show_performance: boolean = false;
 
-export function init_performance_meter(): void
+export let init_performance_meter = (): void =>
 {
     if (DEBUG)
     {
@@ -38,7 +38,7 @@ export function init_performance_meter(): void
     }
 };
 
-export function toggle_performance_display(): void
+export let toggle_performance_display = (): void =>
 {
     if (DEBUG)
     {
@@ -50,7 +50,7 @@ const background: number = 0xf0000000;
 const col_1: number = SCREEN_WIDTH - 8;
 const col_2: number = SCREEN_WIDTH - 160;
 
-export function draw_performance_meter(): void
+export let draw_performance_meter = (): void =>
 {
     if (DEBUG)
         if (show_performance)
@@ -68,7 +68,7 @@ export function draw_performance_meter(): void
         }
 };
 
-export function tick_performance_meter(delta: number, draw_count: number): void
+export let tick_performance_meter = (delta: number, draw_count: number): void =>
 {
     if (DEBUG)
     {
@@ -146,13 +146,19 @@ export function tick_performance_meter(delta: number, draw_count: number): void
     }
 };
 
-export function performance_mark(markName: string): void
+export let performance_mark = (markName: string): void =>
 {
     if (DEBUG)
         performance.mark(markName);
 };
 
-export function assert(predicate: (() => boolean) | boolean, message: string): asserts predicate
+export let debug_log = (...data: any[]): void =>
+{
+    if (DEBUG)
+        console.log(...data);
+};
+
+export function assert(predicate: (() => boolean) | boolean, message: string): asserts predicate 
 {
     if (DEBUG)
     {
@@ -161,10 +167,4 @@ export function assert(predicate: (() => boolean) | boolean, message: string): a
             throw new Error(message);
         }
     }
-}
-
-export function debug_log(...data: any[]): void
-{
-    if (DEBUG)
-        console.log(...data);
 };

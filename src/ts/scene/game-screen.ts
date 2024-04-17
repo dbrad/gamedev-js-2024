@@ -1,9 +1,11 @@
 import { to_abgr_value } from '@graphics/colour';
 import { push_quad, push_textured_quad } from '@graphics/quad';
-import { DOWN_PRESSED, LEFT_PRESSED, RIGHT_PRESSED, UP_PRESSED, set_key_pulse_time } from '@root/_input/controls';
-import { generate_map, get_obj, get_tile, get_vis, set_vis } from '@root/gameplay/map';
-import { new_node } from '@root/node';
-import { ceil, easeOutQuad, floor, is_point_in_rect, lerp, min, points_on_circle, points_on_line, rand_int } from 'math';
+import { A_PRESSED, DOWN_PRESSED, LEFT_PRESSED, RIGHT_PRESSED, UP_PRESSED, set_key_pulse_time } from '@root/_input/controls';
+import { GAME_STATE } from '@root/game-state';
+import { dialog_pending, draw_dialog, push_dialog, update_dialog } from '@root/gameplay/dialog';
+import { get_obj, get_tile, get_vis, set_vis } from '@root/gameplay/map';
+import { ceil, easeOutQuad, floor, is_point_in_rect, lerp, points_on_circle, points_on_line, rand_int } from 'math';
+
 
 let player_pos: V2 = [0, 0];
 let player_dir: number = DIR_D;
@@ -18,21 +20,17 @@ const camera_radius = 11;
 
 let map: LevelMap;
 let light_map: number[] = [];
-let intesity = 1;
-let light_acc = 0;
+let light_intesity = 1;
+let light_flicker_timer = 0;
 let update_lighting = (delta: number): void =>
 {
-    // TODO: Grab other light sources in frame and calc them too.
-    // If light pos +- radius is inside of the camera frame, calc it
-
     light_map.length = 0;
 
-    // light flicker
-    light_acc += delta;
-    if (light_acc > 250)
+    light_flicker_timer += delta;
+    if (light_flicker_timer > 250)
     {
-        intesity = 1 + rand_int(0, 10) / 100;
-        light_acc = 0;
+        light_intesity = 1 + rand_int(0, 10) / 100;
+        light_flicker_timer = 0;
     }
 
     let circle = points_on_circle(player_pos[X], player_pos[Y], 15);
@@ -41,8 +39,8 @@ let update_lighting = (delta: number): void =>
         let point_on_circle = circle[c];
         let line = points_on_line(player_pos[X], player_pos[Y], point_on_circle[X], point_on_circle[Y]);
         let line_length = line.length;
-        let falloff = intesity / line_length;
-        let haw = 0;
+        let light_level = light_intesity / line_length;
+        let walls_hit = 0;
 
         for (let i = 0; i < line_length; i++)
         {
@@ -54,11 +52,11 @@ let update_lighting = (delta: number): void =>
 
             if (!is_point_in_rect(lx, ly, 0, 0, 22, 22)) break;
 
-            let strength = falloff * (line_length - i);
+            let strength = light_level * (line_length - i);
 
             let tile = get_tile(map, pt[X], pt[Y]);
             if (tile === TILE_NONE) { break; }
-            if (tile !== TILE_WALL && haw > 0) { break; }
+            if (tile !== TILE_WALL && walls_hit > 0) { break; }
 
             let idx = lx + ly * 22;
             if (!(idx in light_map) || light_map[idx] > strength)
@@ -67,13 +65,14 @@ let update_lighting = (delta: number): void =>
                 light_map[idx] = 1 - (strength > 1 ? 1 : strength);
             }
 
-            if (tile === TILE_VIS_WALL && haw > 1) { break; }
-            if (tile === TILE_WALL && haw > 1) { break; }
-            if (tile === TILE_WALL) { haw++; }
+            if (tile === TILE_VIS_WALL && walls_hit > 1) { break; }
+            if (tile === TILE_WALL && walls_hit > 1) { break; }
+            if (tile === TILE_WALL) { walls_hit++; }
         }
     }
 };
 
+//#region Player
 let move_player = (x: number, y: number, duration: number = 100): void =>
 {
     // TODO COLLISION CHECK Loot and NPCs
@@ -166,58 +165,76 @@ let draw_player = (): void =>
             break;
     }
     push_textured_quad(t, (camera_radius) * 16 + 136, (camera_radius) * 16, 1, 0xffffcccc, flip, false, !player_walking);
+    // push_text(`${player_pos[X]},${player_pos[Y]}`, (camera_radius) * 16 + 136, (camera_radius) * 16);
 };
+//#endregion Player
 
 let draw_battery = (x: number, y: number, current: number, max: number): void =>
 {
+    // push_quad(x, y, 100, 20, WHITE);
     // Stylized Segmented Bar
 };
 
 ////////////////////////////////////////////////////
 
-export let create_game_scene = (root_id: number): number =>
+export let reset_game_scene = (): void =>
 {
-    set_key_pulse_time([D_UP, D_DOWN, D_LEFT, D_RIGHT], 100);
-    let id = new_node(root_id, update_game_scene, draw_game_scene);
+    set_key_pulse_time([D_DOWN, D_UP, D_RIGHT, D_LEFT], 100);
+    if (!map)
+    {
+        map = GAME_STATE[0];
 
-    map = generate_map();
+        player_pos[X] = map.s[X];
+        player_pos[Y] = map.s[Y];
 
-    player_pos[X] = map.s[X];
-    player_pos[Y] = map.s[Y];
-
-    update_lighting(0);
-
-    return id;
+        update_lighting(0);
+    }
 };
 
-let update_game_scene = (node_id: number, x: number, y: number, delta: number): void =>
+export let update_game_scene = (delta: number): void =>
 {
-    update_player(delta);
+    if (dialog_pending)
+    {
+        update_dialog(delta);
+    }
+    else
+    {
+        update_player(delta);
+
+        if (A_PRESSED)
+        {
+            push_dialog("If you were a hotdog, would you eat|yourself?", ["A simple yes or no question",
+                [
+                    ["Yes", () => { }],
+                    ["For Sure", () => { }]
+                ]]);
+        }
+        if (UP_PRESSED)
+        {
+            player_dir = DIR_U;
+            move_player(0, -1);
+        }
+        else if (DOWN_PRESSED)
+        {
+            player_dir = DIR_D;
+            move_player(0, 1);
+        }
+        else if (RIGHT_PRESSED)
+        {
+            player_dir = DIR_R;
+            move_player(1, 0);
+        }
+        else if (LEFT_PRESSED)
+        {
+            player_dir = DIR_L;
+            move_player(-1, 0);
+        }
+    }
+
     update_lighting(delta);
-
-    if (UP_PRESSED)
-    {
-        player_dir = DIR_U;
-        move_player(0, -1);
-    }
-    else if (DOWN_PRESSED)
-    {
-        player_dir = DIR_D;
-        move_player(0, 1);
-    }
-    else if (RIGHT_PRESSED)
-    {
-        player_dir = DIR_R;
-        move_player(1, 0);
-    }
-    else if (LEFT_PRESSED)
-    {
-        player_dir = DIR_L;
-        move_player(-1, 0);
-    }
 };
 
-let draw_game_scene = (node_id: number, x: number, y: number, delta: number): void =>
+export let draw_game_scene = (delta: number): void =>
 {
     let coffx = 136 - player_offset[X];
     let coffy = -player_offset[Y];
@@ -235,9 +252,7 @@ let draw_game_scene = (node_id: number, x: number, y: number, delta: number): vo
                 case TILE_WALL:
                     push_quad(x * 16 + coffx, y * 16 + coffy, 16, 16, 0xff000000);
                     break;
-                case TILE_FLOOR:
-                    push_quad(x * 16 + coffx, y * 16 + coffy, 16, 16, 0xff444444);
-                    break;
+
                 case TILE_VIS_WALL:
                     push_textured_quad(TEXTURE_WALL, x * 16 + coffx, y * 16 + coffy);
                     break;
@@ -248,10 +263,13 @@ let draw_game_scene = (node_id: number, x: number, y: number, delta: number): vo
                     push_textured_quad(TEXTURE_WALL_MOSS, x * 16 + coffx, y * 16 + coffy);
                     break;
                 case TILE_DOOR_OPEN:
-                    push_quad(x * 16 + coffx, y * 16 + coffy, 16, 16, 0xff44AA44);
-                    break;
+                // push_quad(x * 16 + coffx, y * 16 + coffy, 16, 16, 0xff44AA44);
+                // break;
                 case TILE_DOOR_CLOSED:
-                    push_quad(x * 16 + coffx, y * 16 + coffy, 16, 16, 0xff4444AA);
+                // push_quad(x * 16 + coffx, y * 16 + coffy, 16, 16, 0xff4444AA);
+                // break;
+                case TILE_FLOOR:
+                    push_quad(x * 16 + coffx, y * 16 + coffy, 16, 16, 0xff444444);
                     break;
                 case TILE_NONE:
                 default:
@@ -283,9 +301,10 @@ let draw_game_scene = (node_id: number, x: number, y: number, delta: number): vo
     // Black Bars
     push_quad(0, 0, 152, SCREEN_HEIGHT, 0xff000000);
     push_quad(SCREEN_WIDTH - 152, 0, 152, SCREEN_HEIGHT, 0xff000000);
-
     push_quad(0, 0, SCREEN_WIDTH, 16, 0xff000000);
     push_quad(0, SCREEN_HEIGHT - 24, SCREEN_WIDTH, 24, 0xff000000);
+
+    draw_battery(0, 0, 0, 10);
 
     // Minimap
     for (let x = 1; x < map.w; x += 2)
@@ -321,4 +340,6 @@ let draw_game_scene = (node_id: number, x: number, y: number, delta: number): vo
             }
         }
     }
+
+    draw_dialog();
 };

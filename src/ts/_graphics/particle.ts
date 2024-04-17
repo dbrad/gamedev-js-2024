@@ -1,5 +1,5 @@
-import { set_V2 } from "@root/_math/vector";
 import { floor, lerp, math } from "@root/_math/math";
+import { set_V2 } from "@root/_math/vector";
 import { set_v4_to_colour, to_abgr_value } from "./colour";
 import { push_quad } from "./quad";
 
@@ -22,7 +22,7 @@ let particles: Particle[] = [];
 let pool_index = MAX_PARTICLES - 1;
 let active_particles: Set<number> = new Set();
 
-export function init_particles(): void
+export let init_particles = (): void =>
 {
     for (let i = MAX_PARTICLES - 1; i >= 0; --i)
     {
@@ -39,9 +39,9 @@ export function init_particles(): void
             lifetime_remaining_: 0,
         };
     }
-}
+};
 
-export function update_particles(delta: number): void
+export let update_particles = (delta: number): void =>
 {
     let delta_in_seconds = (delta / 1000);
     let indexes = active_particles.values();
@@ -71,14 +71,14 @@ export function update_particles(delta: number): void
         particle.colour_[B] = floor(lerp(colour_end[B], colour_begin[B], life_progress));
         particle.colour_[A] = floor(lerp(colour_end[A], colour_begin[A], life_progress));
     }
-}
+};
 
 export let clear_particles = (): void =>
 {
     active_particles.clear();
 };
 
-export function draw_particles(delta: number): void
+export let draw_particles = (delta: number): void =>
 {
     let indexes = active_particles.values();
     for (let i of indexes)
@@ -89,9 +89,9 @@ export function draw_particles(delta: number): void
             particle.size_, particle.size_,
             to_abgr_value(particle.colour_[R], particle.colour_[G], particle.colour_[B], particle.colour_[A]));
     }
-}
+};
 
-export function emit_particle(x: number, y: number, vx: number, vy: number, vrx: number, vry: number, size_begin: number, size_end: number, size_variation: number, from_colour: number, to_colour: number, lifetime: number): void
+export let emit_particle = (x: number, y: number, vx: number, vy: number, vrx: number, vry: number, size_begin: number, size_end: number, size_variation: number, from_colour: number, to_colour: number, lifetime: number): void =>
 {
     active_particles.add(pool_index);
     let particle = particles[pool_index];
@@ -115,4 +115,4 @@ export function emit_particle(x: number, y: number, vx: number, vy: number, vrx:
     --pool_index;
     if (pool_index < 0)
         pool_index = MAX_PARTICLES - 1;
-}
+};

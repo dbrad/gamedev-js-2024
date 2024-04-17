@@ -1,4 +1,3 @@
-// V2
 export let copy_V2 = (source: V2): V2 =>
 {
   return [source[X], source[Y]];

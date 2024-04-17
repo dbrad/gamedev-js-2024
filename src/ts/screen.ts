@@ -1,4 +1,3 @@
-import { assert } from '@debug';
 import { floor, min } from 'math';
 
 let stage: HTMLDivElement;
@@ -39,9 +38,6 @@ export let request_fullscreen = (canvas: HTMLCanvasElement): void =>
   {
     if (!document.fullscreenElement)
     {
-      // let body = document.querySelector("body");
-      // let fullscreen = canvas.requestFullscreen || canvas.mozRequestFullScreen || canvas.webkitRequestFullscreen || canvas.msRequestFullscreen;
-      // assert(fullscreen !== undefined, "Unable to find a requestFullscreen implementation.");
       document.body.requestFullscreen();
     }
     else

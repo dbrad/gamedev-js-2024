@@ -1,0 +1,20 @@
+Battery Display
+Battery Timer
+Currency Display
+Inventory Display
+
+Make Doors Exist
+Make Doors Work!
+
+Interactables
+- NPCS
+- Chests
+- Piles
+- Security Panels
+
+Layout Homebase
+
+Minigame System
+- Flip a Bit
+- Slots
+- RPS

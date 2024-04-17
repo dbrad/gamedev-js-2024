@@ -1,11 +1,12 @@
-type GameState = [
-    MetaGameState,
-    CurrentGameState,
+type TimedFunction = (delta: number) => void;
+
+type Scene = [
+    reset_fn: VoidFunction,
+    update_fn: TimedFunction,
+    draw_fn: TimedFunction,
 ];
 
-type MetaGameState = [
-    number, // STORY_PROGRESS
-];
+type MetaGameState = [];
 
 type Player = [
     name: string,
